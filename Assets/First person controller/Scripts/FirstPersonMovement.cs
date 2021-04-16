@@ -12,33 +12,39 @@ public class FirstPersonMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float sensitivity = 5f;
     Rigidbody rb;
+    public GameObject mainCamera;
     Camera playerCam;
     float xRotation;
-    Transform playerBody;
+    public Transform playerBody;
     SpringJoint joint;
     Vector3 grapplePoint;
     public Rope rope;
 
-    [Header("Running")]
-    public bool canRun = true;
-    public bool IsRunning { get; private set; }
-    public float runSpeed = 9;
-    public KeyCode runningKey = KeyCode.LeftShift;
-    /// <summary> Functions to override movement speed. Will use the last added override. </summary>
-    public List<System.Func<float>> speedOverrides = new List<System.Func<float>>();
-
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        playerBody = this.transform;
+        //playerBody = this.transform;
         xRotation = 0f;
-        playerCam = GetComponentInChildren<Camera>();
+        playerCam = mainCamera.GetComponent<Camera>();
         readyToJump = true;
         whatIsGround = LayerMask.GetMask("Default");
         rb = GetComponent<Rigidbody>();
     }
 
-    void Update()
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            StartGrapple();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            StopGrapple();
+        }
+    }
+
+    private void FixedUpdate()
     {
         Movement();
         Look();
@@ -47,7 +53,6 @@ public class FirstPersonMovement : MonoBehaviour
     private void Movement()
     {
         grounded = Physics.OverlapSphere(groundChecker.transform.position, radius: 0.1f, whatIsGround).Length > 0;
-        print(grounded);
 
         float x = Input.GetAxisRaw("Horizontal");
         float y = Input.GetAxisRaw("Vertical");
@@ -63,8 +68,8 @@ public class FirstPersonMovement : MonoBehaviour
         if (y > 0 && yMag > 5) y = 0;
         if (y < 0 && yMag < -5) y = 0;
 
-        rb.AddForce(transform.forward * y * moveSpeed * Time.deltaTime);
-        rb.AddForce(transform.right * x * moveSpeed * Time.deltaTime);
+        rb.AddForce(transform.forward * y * moveSpeed * Time.fixedDeltaTime);
+        rb.AddForce(transform.right * x * moveSpeed * Time.fixedDeltaTime);
 
         if(grounded && readyToJump && jumping)
         {
@@ -73,18 +78,6 @@ public class FirstPersonMovement : MonoBehaviour
             Invoke(nameof(ResetJump), jumpCooldown);
         }
 
-
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            StartGrapple();
-        }
-
-        if (Input.GetKeyUp(KeyCode.Mouse0))
-        {
-            StopGrapple();
-        }
-
-        
     }
 
     private void StartCrouch()
@@ -108,7 +101,7 @@ public class FirstPersonMovement : MonoBehaviour
 
     private void StartGrapple()
     {
-        print("grapple");
+        //print("grapple");
         RaycastHit[] hits = Physics.RaycastAll(playerCam.transform.position, playerCam.transform.forward, Mathf.Infinity, whatIsGround);
         if (hits.Length < 1) return;
         grapplePoint = hits[0].point;
@@ -123,13 +116,8 @@ public class FirstPersonMovement : MonoBehaviour
 
     private void Look()
     {
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.fixedDeltaTime;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(value: xRotation, min: -90f, max: 90f);
-
-        playerCam.transform.localRotation = Quaternion.Euler(xRotation, y: 0, z: 0);
         playerBody.Rotate(eulers: Vector3.up * mouseX);
     }
 
@@ -143,15 +131,15 @@ public class FirstPersonMovement : MonoBehaviour
         if (!grounded) return;
         //float threshold = 0.3f;
         float multiplier = 0.3f;
-        print(mag.x);
+        //print(mag.x);
 
         if (x == 0)
         {
-            rb.AddForce(moveSpeed * transform.right * Time.deltaTime * -mag.x * multiplier);
+            rb.AddForce(moveSpeed * transform.right * Time.fixedDeltaTime * -mag.x * multiplier);
         }
         if (y == 0)
         {
-            rb.AddForce(moveSpeed * transform.forward * Time.deltaTime * -mag.y * multiplier);
+            rb.AddForce(moveSpeed * transform.forward * Time.fixedDeltaTime * -mag.y * multiplier);
         }
     }
 

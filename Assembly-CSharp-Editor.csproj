@@ -61,6 +61,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\Editor\BasicInkExampleEditor.cs" />
+    <Compile Include="Assets\FPController\Script\Editor\FPEditorUtility.cs" />
+    <Compile Include="Assets\FPController\Script\Editor\FirstPersonPresetInspector.cs" />
+    <Compile Include="Assets\FPController\InputManager\Editor\InputEventInspector.cs" />
+    <Compile Include="Assets\FPController\InputManager\Editor\KeybindInspector.cs" />
+    <Compile Include="Assets\FPController\Script\Editor\FirstPersonControllerInspector.cs" />
+    <Compile Include="Assets\FPController\Script\Editor\FirstPersonCreatorWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
